@@ -1,24 +1,28 @@
-import "@testing-library/jest-dom";
+import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import App from "../components/App";
+import "@testing-library/jest-dom/extend-expect"; // Add this import
 import Task from "../components/Task";
 
-test("displays the task text", () => {
-  render(<Task text={"text!"} category={"category!"} />);
-  expect(screen.queryByText("text!")).toBeInTheDocument();
-});
+describe("Task Component", () => {
+  const mockTask = {
+    text: "Buy groceries",
+    category: "Shopping",
+  };
+  const mockOnDelete = jest.fn();
 
-test("displays the task category", () => {
-  render(<Task text={"text!"} category={"category!"} />);
-  expect(screen.queryByText("category!")).toBeInTheDocument();
-});
+  test("displays the task text and category", () => {
+    render(<Task task={mockTask} onDelete={mockOnDelete} />);
 
-test("is removed from the list when the delete button is clicked", () => {
-  render(<App />);
-  const task = screen.queryByText(/Buy rice/);
-  const deleteButton = task.parentElement.querySelector("button");
+    expect(screen.getByText("Buy groceries")).toBeInTheDocument();
+    expect(screen.getByText("Shopping")).toBeInTheDocument();
+  });
 
-  fireEvent.click(deleteButton);
+  test("calls onDelete when delete button is clicked", () => {
+    render(<Task task={mockTask} onDelete={mockOnDelete} />);
 
-  expect(screen.queryByText(/Buy rice/)).not.toBeInTheDocument();
+    const deleteButton = screen.getByRole("button", { name: "X" });
+    fireEvent.click(deleteButton);
+
+    expect(mockOnDelete).toHaveBeenCalledWith("Buy groceries");
+  });
 });
